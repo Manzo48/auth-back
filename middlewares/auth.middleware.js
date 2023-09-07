@@ -1,7 +1,8 @@
 const jwt = require("jsonwebtoken");
 
-module.exports = async (req, res, next) => {
+module.exports.auth = async (req, res, next) => {
   const { authorization } = req.headers;
+  const tokenn = (req.headers.authorization || '').replace(/Bearer\s?/, '');
 
   if (!authorization) {
     return res.status(401).json("Нет доступа (no authorization)");
@@ -13,10 +14,11 @@ module.exports = async (req, res, next) => {
     return res.status(401).json("неверный тип токена");
   }
   try {
-    req.user = await jwt.verify(token, process.env.SECRET_JWT_KEY);
-
+    const decoded = jwt.verify(token, process.env.SECRET_JWT_KEY)
+    req.userId = decoded.id
     next();
   } catch (e) {
     return res.status(401).json("неверный токен");
   }
 };
+
